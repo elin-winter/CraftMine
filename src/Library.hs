@@ -71,7 +71,7 @@ usarMateriales :: Receta -> Personaje -> [Material]
 usarMateriales receta personaje = filter (`notElem` materiales receta) (inventario personaje)
 
 obtenerPuntosReceta :: Receta -> Puntaje
-obtenerPuntosReceta receta = div (tiempo receta) 10
+obtenerPuntosReceta receta = tiempo receta * 10
 
 -- ------------ Parte 2
 -- Funcion 1
@@ -83,11 +83,12 @@ duplicanPuntos personaje receta =  puntaje (creaftearObjeto receta personaje) >=
 
 -- Funcion 2
 craftearSucesivamente :: Personaje -> [Receta] -> Personaje
-craftearSucesivamente = foldr creaftearObjeto 
+craftearSucesivamente = foldl (flip creaftearObjeto) 
 
 -- Funcion 3
 masPuntosReversa :: Personaje -> [Receta] -> Bool
-masPuntosReversa personaje recetas = puntosDespuesCraft personaje recetas < puntosDespuesCraft personaje (reverse recetas)
+masPuntosReversa personaje recetas = 
+    puntosDespuesCraft personaje recetas < puntosDespuesCraft personaje (reverse recetas)
 
 puntosDespuesCraft :: Personaje -> [Receta] -> Puntaje
 puntosDespuesCraft personaje recetas = puntaje (craftearSucesivamente personaje recetas)
@@ -103,7 +104,7 @@ puedeMinar :: Bioma -> Personaje -> Bool
 puedeMinar bioma = puedeCraftear [elemNecesario bioma]
 
 conseguirMateriales :: Bioma -> Personaje -> Herramienta -> Personaje
-conseguirMateriales bioma personaje herramienta = agregarInventario (herramienta (materialesBioma bioma)) personaje
+conseguirMateriales bioma personaje herramienta = (modificarPuntos 50 . agregarInventario (herramienta (materialesBioma bioma))) personaje
 
 hacha :: Herramienta
 hacha = last
@@ -121,7 +122,10 @@ martillo :: Herramienta
 martillo = flip (!!) 4
 
 tijeras :: Herramienta
-tijeras lista = (!!) lista (((`div` 2) . length) lista)
+tijeras lista =  (!!) lista (indiceMedio lista)
+
+indiceMedio :: [Material] -> Number
+indiceMedio = flip div 2 . length
 
 sincel :: Herramienta
 sincel = \lista -> (!!) lista 3
@@ -144,7 +148,6 @@ Ahora, si la herramienta requiere evaluar la lista completa, sin excepción, por
 motocierra que requiere la longitud de la lista, entonces la función minar en ese caso
 nunca va poder devolver un resultado. 
 -}
-
 
 
 
